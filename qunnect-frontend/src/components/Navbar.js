@@ -81,7 +81,7 @@ const Navbar = () => {
                   Home
                 </Link>
                <Link
-                  to="#"
+                  to="messages"
                   className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
                 >
                   Messages
@@ -204,7 +204,7 @@ const Navbar = () => {
             Home
           </Link>
          <Link
-            to="#"
+            to="messages"
             className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
           >
             Messages

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export const ProfileCard = () => {
   return (
@@ -21,8 +22,10 @@ export const ProfileCard = () => {
               />
             </div>
             {/* User Info with Verified Button */}
-            <div className="flex items-center mt-4">
-              <h2 className="text-xl font-bold text-gray-800">John Doe</h2>
+            <div className="flex items-center mt-12">
+              <h2 className="text-xl font-bold text-gray-800 hover:underline">
+              <Link to='/profile'>Shivang Srivastava</Link>
+              </h2>
               <button className=" px-2 py-1 rounded-full">
                 <svg
                   fill="#4d9aff"
