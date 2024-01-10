@@ -101,6 +101,24 @@ const Signup = () => {
                   />
                 </div>
               </div>
+              <div>
+                <label
+                  htmlFor="dob"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Date of Birth
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="dob"
+                    name="dob"
+                    type="date"
+                    required=""
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    placeholder="Enter your password"
+                  />
+                </div>
+              </div>
               
               <div>
                 <button

@@ -3,7 +3,7 @@ import React from 'react'
 const Message = () => {
   return (
     <>
-  <div className="flex flex-row h-screen antialiased text-gray-800">
+  <div className="flex flex-row mt-10 h-screen justify-center antialiased text-gray-800">
   <div className="flex flex-row w-96 h-4/5 flex-shrink-0 bg-gray-100 p-4">
    
     <div className="flex flex-col w-full h-full pl-4 pr-4 py-4 -mr-4">
@@ -155,7 +155,7 @@ const Message = () => {
       </div>
     </div>
   </div>
-  <div className="flex flex-col h-4/5 w-full bg-white px-4 py-6">
+  <div className="flex flex-col h-4/5 w-3/6 bg-white px-4 py-6  border-solid border-2 border-grey-600">
     <div className="flex flex-row items-center py-4 px-6 rounded-2xl shadow">
       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-100">
         T
