@@ -25,18 +25,6 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
-    friends: [
-      {
-        type:  mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    posts: [
-      {
-        type:  mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
     totalPostsCreated: {
       type: Number,
       default: 0,
@@ -45,6 +33,18 @@ const userSchema = new mongoose.Schema(
       {
         type:String
       }
+    ],
+    friends: [
+      {
+        type:  mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    postsCreated: [
+      {
+        type:  mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
     ],
     postsLiked: [
       {
@@ -62,7 +62,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
   const salt = await bcrypt.genSaltSync(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -71,6 +71,26 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.isPasswordMatched = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+
+userSchema.pre('find', async function(next) {
+  this.totalPostsCreated = this.populate('postsCreated').length;
+  this.populate({
+    path: 'friends',
+    count:true,
+  });
+  this.populate({
+    path: 'postsCreated',
+    count:true,
+  });
+  this.populate({
+    path: 'postsLiked',
+  });
+  this.populate({
+    path: 'postsComments',
+  });
+  next();
+});
 
 
 // Create the User model

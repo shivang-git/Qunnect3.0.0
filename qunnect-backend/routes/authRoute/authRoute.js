@@ -1,10 +1,10 @@
 import express from 'express';
-import { registerUser,loginUser, getUsers, updateUser } from '../controllers/authController.js';
+import { registerUser,loginUser, getUsers, updateUser, getUser } from '../../controllers/authController.js';
 
 const router=express.Router();
 
 router.get('/get-users',getUsers);
-
+router.get('/get-user',getUser);
 
 
 
@@ -14,7 +14,7 @@ router.post('/login',loginUser);
 
 
 
-router.put('/update/:id',updateUser);
+router.put('/update',updateUser);
 
 
 

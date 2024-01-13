@@ -2,52 +2,72 @@ import User from "../models/userModel.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const {email}=req.body;
-    const existingUser = await User.findOne({email});
+    const { email } = req.body;
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-       return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
     // Create a new user
-    const newUser =await User.create(req.body);
+    const newUser = await User.create(req.body);
     res.status(201).json(newUser);
   } catch (error) {
-        throw new Error(error);
+    throw new Error(error);
   }
 };
 
-export const loginUser = async(req, res) => {
+export const loginUser = async (req, res) => {
   try {
-    const {email,password}=req.body;
-    const findUser=await User.findOne({email});
-    if (findUser && (await findUser.isPasswordMatched(password)) ) {
-        res.status(201).json({message:"user login successfully"});
+    const { email, password } = req.body;
+    const findUser = await User.findOne({ email });
+    if (findUser && (await findUser.isPasswordMatched(password))) {
+      res.status(201).json({ message: "user login successfully" });
     } else {
-        res.status(400).json({ message: 'Invalid credential' });
+      res.status(400).json({ message: "Invalid credential" });
     }
+  } catch (error) {
+    console.error(error)
+  }
+};
+
+export const getUsers = async (req, res) => {
+  const allUsers = await User.find();
+  res.json(allUsers);
+};
+
+export const getUser = async (req, res) => {
+  try {
+    // Ensure a user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const findUser = await User.findById(id);
+    if (!findUser) {
+      return res.status(400).json({ message: "No user found" });
+    }
+    const updateUser = await User.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    res.status(201).json(updateUser);
   } catch (error) {
     throw new Error(error);
   }
 };
 
-export const getUsers = async(req, res) => {
-    const allUsers=await User.find();
-    res.json(allUsers);
-};
-
-export const updateUser = async(req, res) => {
- try {
-    const {id}=req.params
-    const findUser=await User.findById(id);
-    if(!findUser){
-        return res.status(400).json({message:"No user found"});
-    }
-    const updateUser=await User.findByIdAndUpdate(id,req.body,{new:true});
-    res.status(201).json(updateUser);
- } catch (error) {
-    throw new Error(error);
- }
-};
-
-export const logoutUser = async(req, res) => {
+export const logoutUser = async (req, res) => {
   console.log("logout");
 };

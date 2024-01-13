@@ -3,16 +3,15 @@ import mongoose from "mongoose";
 // Define the Comment Schema
 const commentSchema = new mongoose.Schema(
   {
-    user: {
+    author: {
       type:  mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
-    post: {
+    postedOn: {
       type:  mongoose.Schema.Types.ObjectId,
       ref: "Post",
     },
-    cmtDesc: {
+    text: {
       type: String,
       required: true,
     },
@@ -23,6 +22,20 @@ const commentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
+
+// Middleware to automatically populate author and post on every query
+commentSchema.pre('find', async function(next) {
+  this.populate({
+    path: 'author'
+  });
+  this.populate({
+    path:'postedOn'
+  });
+  next();
+});
+
 
 const Comment = mongoose.model("Comment", commentSchema);
 
