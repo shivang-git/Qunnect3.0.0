@@ -13,3 +13,9 @@ export const cloudinaryUploadImg = async (fileToUpload) => {
      return (cloudinaryResult.secure_url);
 
 };
+
+
+export const cloudinaryDeleteImg = async (fileToDelete) => {
+  await cloudinary.uploader.destroy(fileToDelete,{folder: 'qunnect'});
+
+};

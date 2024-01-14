@@ -6,23 +6,26 @@ import {
   getPost,
   getPosts,
   likePost,
+  profilePosts,
   updatePost,
 } from "../../controllers/postController.js";
 import { uploadImage } from "../../middlewares/uploadImages.js";
 
 const router = express.Router();
 
-router.get("/get-posts", getPosts);
 router.get("/get-post/:postId", getPost);
-router.get('/:postId/get-comments')
+router.get('/:userId/posts',profilePosts);
+router.get("/get-posts", getPosts);
+
+// router.get('/:postId/get-comments')
 
 
-router.post("/create-post",uploadImage.single('postImage'), createPost);
 router.post('/:postId/comment',createComment);
+router.post("/create-post",uploadImage.single('postImage'), createPost);
 
 
-router.put("/update-post/:postId", updatePost);
 router.put("/:postId/like", likePost);
+router.put("/update-post/:postId", updatePost);
 
 
 router.delete("/delete-post/:postId", deletePost);
