@@ -8,19 +8,7 @@ import {
 } from "../utils/cloudinaryConfig.js";
 
 //--------------------post section
-//get all the post on the webapp
-export const getPosts = async (req, res) => {
-  try {
-    const posts = await Post.find()
-      .populate("author", "firstname lastname") // populate author during fetching post
-      .sort({ createdAt: -1 }); //sort by recent post
 
-    res.json(posts);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Unable to get posts" });
-  }
-};
 
 //get a single post
 export const getPost = async (req, res) => {
@@ -56,6 +44,19 @@ export const profilePosts = async (req, res) => {
   }
 };
 
+//get all the post on the webapp
+export const getPosts = async (req, res) => {
+  try {
+    const posts = await Post.find()
+      .populate("author", "firstname lastname") // populate author during fetching post
+      .sort({ createdAt: -1 }); //sort by recent post
+
+    res.json(posts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Unable to get posts" });
+  }
+};
 
 
 //Done with image upload to cloudinary
@@ -156,19 +157,28 @@ export const createComment = async (req, res) => {
   }
 };
 
-// //get all comment on particular post done
-// export const getComment=async(req,res)=>{
-//   try {
 
-//   } catch (error) {
+//get all comment on particular post done
+export const getComment=async(req,res)=>{
+  try {
+    const postId = req.params.postId;
 
-//   }
+    // Find comments for the specified post
+    const comments = await Comment.find({ post: postId })
+      .populate('author') // Populate the author field
+      .sort({ createdAt: -1 });
 
-// }
+    res.json(comments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error fetching comments' });
+  }
+
+}
+
 
 //like section
 //done like and unlike a specific post
-
 export const likePost = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -196,3 +206,4 @@ export const likePost = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+

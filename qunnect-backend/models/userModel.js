@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
     },
+    profilePhoto: {
+      type: String,
+    },
+    profileBanner: {
+      type: String,
+    },
     refreshToken: {
       type: String,
     },

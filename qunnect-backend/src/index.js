@@ -9,6 +9,7 @@ connectDB();
 
 import AuthRouter from '../routes/authRoute/authRoute.js'
 import PostRouter from '../routes/postRoute/postRoute.js'
+import UserRouter from '../routes/userRoute/userRoute.js'
 
 const app=express();
 const port=process.env.PORT || 8000
@@ -20,7 +21,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 app.use(cookieParser())
 
-app.use('/api/user',AuthRouter)
+app.use('/api/auth',AuthRouter)
+app.use('/api/user',UserRouter)
 app.use('/api/posts',PostRouter)
 
 app.listen(port,()=>{

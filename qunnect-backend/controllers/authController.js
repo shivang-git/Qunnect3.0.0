@@ -1,73 +1,114 @@
 import User from "../models/userModel.js";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../config/emailConfig.js";
 
+//access and refresh token required
 export const registerUser = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, firstname, lastname, password } = req.body;
+    if (!firstname || !lastname || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
     // Create a new user
-    const newUser = await User.create(req.body);
+    const newUser = await User.create({
+      firstname,
+      lastname,
+      email,
+      password,
+    });
     res.status(201).json(newUser);
   } catch (error) {
     throw new Error(error);
   }
 };
 
+//access token required
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const findUser = await User.findOne({ email });
-    if (findUser && (await findUser.isPasswordMatched(password))) {
-      res.status(201).json({ message: "user login successfully" });
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+    const user = await User.findOne({ email });
+    if (user && (await user.isPasswordMatched(password))) {
+      const accessToken = generateAccessToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      await user.updateOne({ refreshToken });
+      res.json({ accessToken });
     } else {
-      res.status(400).json({ message: "Invalid credential" });
+      return res.status(400).json({ message: "Invalid credential" });
     }
-  } catch (error) {
-    console.error(error)
-  }
-};
-
-export const getUsers = async (req, res) => {
-  const allUsers = await User.find();
-  res.json(allUsers);
-};
-
-export const getUser = async (req, res) => {
-  try {
-    // Ensure a user is authenticated
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json(user);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ error: "Error login user" });
   }
 };
 
-export const updateUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const findUser = await User.findById(id);
-    if (!findUser) {
-      return res.status(400).json({ message: "No user found" });
-    }
-    const updateUser = await User.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-    res.status(201).json(updateUser);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
+//not done
 export const logoutUser = async (req, res) => {
   console.log("logout");
+};
+
+
+//password reset token done
+export const passwordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ errors: ["User not found"] });
+    }
+
+    // Generate a password reset token
+    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h", // Expires in 1 hour
+    });
+
+    // Send password reset email
+    const resetUrl = `<p>Follow the given link to reset the password.this link is valid till 1 hr.</p> <a href=${process.env.HOST}reset-password/${resetToken}> Click here </a>`;
+    const data = {
+      to: email,
+      text: "Qunnect reset password",
+      subject: "forget password link",
+      html: resetUrl,
+    };
+    sendEmail(data);
+
+    res.json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ errors: ["Failed to send password reset email"] });
+  }
+};
+
+
+//reset-password done
+export const updatePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    // Verify password reset token
+    const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(400).json({ errors: ["Invalid password reset token"] });
+    }
+
+    // Update user password
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ errors: ["Failed to reset password"] });
+  }
 };

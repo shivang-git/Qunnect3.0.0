@@ -3,6 +3,7 @@ import {
   createComment,
   createPost,
   deletePost,
+  getComment,
   getPost,
   getPosts,
   likePost,
@@ -13,11 +14,10 @@ import { uploadImage } from "../../middlewares/uploadImages.js";
 
 const router = express.Router();
 
-router.get("/get-post/:postId", getPost);
+router.get('/:postId/get-comments',getComment);
 router.get('/:userId/posts',profilePosts);
+router.get("/get-post/:postId", getPost);
 router.get("/get-posts", getPosts);
-
-// router.get('/:postId/get-comments')
 
 
 router.post('/:postId/comment',createComment);
