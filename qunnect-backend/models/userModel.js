@@ -69,7 +69,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre('save', async function (next) {
-  const salt = await bcrypt.genSaltSync(10);
+  const salt = bcrypt.genSaltSync(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
@@ -80,7 +80,6 @@ userSchema.methods.isPasswordMatched = async function (enteredPassword) {
 
 
 userSchema.pre('find', async function(next) {
-  this.totalPostsCreated = this.populate('postsCreated').length;
   this.populate({
     path: 'friends',
     count:true,

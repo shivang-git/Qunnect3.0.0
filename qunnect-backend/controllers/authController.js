@@ -1,14 +1,15 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../config/emailConfig.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../config/jwtToken.js";
 
 //access and refresh token required
 export const registerUser = async (req, res) => {
   try {
     const { email, firstname, lastname, password } = req.body;
-    if (!firstname || !lastname || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -20,7 +21,9 @@ export const registerUser = async (req, res) => {
       email,
       password,
     });
-    res.status(201).json(newUser);
+
+    const savedUser = await User.findById(newUser._id).select("-password");
+    return res.status(201).json(savedUser);
   } catch (error) {
     throw new Error(error);
   }
@@ -30,21 +33,27 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
-    }
     const user = await User.findOne({ email });
-    if (user && (await user.isPasswordMatched(password))) {
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
+    const isCorrect = user.isPasswordMatched(password);
 
-      await user.updateOne({ refreshToken });
-      res.json({ accessToken });
-    } else {
+    if (!user || !isCorrect) {
       return res.status(400).json({ message: "Invalid credential" });
     }
+
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({ user, accessToken, refreshToken });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error login user" });
@@ -53,9 +62,66 @@ export const loginUser = async (req, res) => {
 
 //not done
 export const logoutUser = async (req, res) => {
-  console.log("logout");
+  try {
+    const loggedOut = await User.findByIdAndUpdate(
+      req.user?.id,
+      {
+        $set: {
+          refreshToken: undefined,
+        },
+      },
+      {
+        new: true,
+      }
+    ).select("-password");
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    res
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({ loggedOut, msg: "User LoggedOut Successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error logout user" });
+  }
 };
 
+export const refreshToken = async (req, res) => {
+  const token = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!token) {
+    throw new Error("Unauthorised user");
+  }
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  const user = await User.findById(decodedToken?.id);
+
+  if (!user) {
+    return res.json({ msg: "Invallid refresh Token" });
+  }
+  if (token !== user.refreshToken) {
+    return res.json({ msg: "Refresh Token is expired" });
+  }
+
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
+
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json({ user, accessToken, refreshToken });
+};
 
 //password reset token done
 export const passwordReset = async (req, res) => {
@@ -88,7 +154,6 @@ export const passwordReset = async (req, res) => {
     res.status(500).json({ errors: ["Failed to send password reset email"] });
   }
 };
-
 
 //reset-password done
 export const updatePassword = async (req, res) => {
