@@ -3,6 +3,8 @@ import { userAPI } from "./userAPI";
 const initialState={
     users:[],
     friends:[],
+    profileUser:{},
+    profilePost:[],
     isError:false,
     isLoggedIn:false,
     isRegistered:false,
@@ -46,6 +48,23 @@ export const userSlice=createSlice({
             state.isError=true
             state.isSuccess=false
         })
+        .addCase(getprofileUsers.pending,(state)=>{
+            state.isLoading=true
+        })
+        .addCase(getprofileUsers.fulfilled,(state,action)=>{
+            state.isLoading=false
+            state.isError=false
+            state.isRegistered=true
+            state.isSuccess=true  
+            const {posts,user}=action.payload
+            state.profileUser=user            
+            state.profilePost=posts
+        })
+        .addCase(getprofileUsers.rejected,(state)=>{
+            state.isLoading=false
+            state.isError=true
+            state.isSuccess=false
+        })
        
     }
 })
@@ -61,6 +80,16 @@ export const getUsers=createAsyncThunk("user/get-users",async(thunkAPI)=>{
         return thunkAPI.rejectWithValue(error)
     }
 })
+
+export const getprofileUsers=createAsyncThunk("user/profile",async(slug,thunkAPI)=>{
+    try {
+        const response=await userAPI.getprofileUsers(slug);
+        return response;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error)
+    }
+})
+
 
 export const getFriends=createAsyncThunk("user/get-friends",async(thunkAPI)=>{
     try {

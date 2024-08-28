@@ -10,8 +10,6 @@ const FindFriends = () => {
   
   const {isLoading}= useSelector((state) => state.users);
   const users = useSelector((state) => state.users.users);
-
-  
   
   useEffect(() => {
     dispatch(getUsers());
@@ -22,9 +20,9 @@ const FindFriends = () => {
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         {isLoading ? (
         "Loading....."
-      ) : users && users.length > 0 ? (
+      ) : users && users?.length > 0 ? (
         <ul role="list" className="divide-y divide-gray-100">
-          {users.map((friend) => (
+          {users?.map((friend) => (
            <FriendsCard key={friend._id} friend={friend}/>
           ))}
         </ul>

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcryptjs'
+import { v4 as uuidv4 } from 'uuid';
 const userSchema = new mongoose.Schema(
   {
     firstname: {
@@ -10,6 +11,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    fullname:{
+      type:String,
+    },
     email: {
       type: String,
       required: true,
@@ -18,6 +22,10 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+    },
+    slug:{
+      type:String,
+      unique:true,
     },
     dob:{
       type:Date
@@ -70,6 +78,10 @@ const userSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+    conversations: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Conversation',
+    }],
   },
   { timestamps: true }
 );
@@ -77,6 +89,28 @@ const userSchema = new mongoose.Schema(
 userSchema.pre('save', async function (next) {
   const salt = bcrypt.genSaltSync(10);
   this.password = await bcrypt.hash(this.password, salt);
+ 
+  const formatName=(name)=>{
+    return name.trim().toLowerCase().replace(/^\w/,(c)=>c.toUpperCase());
+  }
+
+
+  this.firstname=formatName(this.firstname)
+  this.lastname=formatName(this.lastname)
+
+  if(!this.slug){
+    const uniqueId=uuidv4().split('-')[0];
+    this.slug=`${this.firstname}-${this.lastname}-${uniqueId}`;
+  }
+
+  this.fullname = `${this.firstname} ${this.lastname}`;
+
+
+
+
+
+
+
   next();
 });
 

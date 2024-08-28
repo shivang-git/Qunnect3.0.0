@@ -6,7 +6,7 @@ const FriendsCard = ({ friend }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user.user);
   const isFriendStatus = user.friends.includes(friend._id);
-  
+ 
   const handleFollow = () => {
     dispatch(isFriend(friend._id));
   };

@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 import sendAccessToken from './utils/sendAccessToken';
 import PrivateRoute from "./utils/PrivateRoute";
 import FindFriends from "./pages/FindFriends";
-import Conversation from './components/Converstation';
+
 
 function App() {
 
@@ -27,7 +27,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<PrivateRoute element={Home} />} />
-            <Route path="profile" element={<PrivateRoute element={Profile} />} />
+            <Route path="profile/:slug" element={<PrivateRoute element={Profile} />} />
             <Route path="messages" element={<PrivateRoute element={Message} />} >
             </Route>  
             <Route path="find-friends" element={<PrivateRoute element={FindFriends} />}/>

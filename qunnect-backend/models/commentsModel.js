@@ -33,17 +33,17 @@ const commentSchema = new mongoose.Schema(
 
 // Middleware to automatically populate author and post on every query
 commentSchema.pre('find', async function(next) {
+  this.moments = timeAgo(this.createdAt);
   this.populate({
     path: 'author'
   });
   this.populate({
     path:'postedOn'
   });
-  this.moments = timeAgo(this.createdAt);
   next();
 });
 
-commentSchema.pre('save', async function(next) {
+commentSchema.pre('create', async function(next) {
   this.moments = timeAgo(this.createdAt); 
   next();
 });

@@ -1,12 +1,10 @@
+import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import { cloudinaryDeleteImg, cloudinaryUploadImg } from "../utils/cloudinaryConfig.js";
 
 export const getUsers = async (req, res) => {
   try {
-   
-    
     const currentUserId = req.user._id;
-  
     const users = await User.aggregate([
       {
         $match: {
@@ -48,9 +46,18 @@ export const getUser = async (req, res) => {
 };
 
 export const profile = async (req, res) => {
+  const { slug } = req.params;
   try {
-    const user = await User.findById(req.user.id);
-    res.json(user); // Return the authenticated user
+    
+    const user = await User.findOne({slug});
+    
+    const posts = await Post.find({ author: user._id })
+      .populate('author', 'fullname profilePhoto profileBanner') // Populate author details
+      .populate({
+        path: 'comments',
+        options: { sort: { createdAt: -1 }, limit: 3 }, // Populate comments with sorting and limit
+      });
+    res.json({posts,user});
   } catch (error) {
     console.error(error);
     res.status(500).json({ errors: ["Failed to fetch user data"] });
@@ -128,7 +135,6 @@ export const isFriend = async (req, res) => {
   try {
     const user = await User.findById(userId);
     const friend = await User.findById(friendId);
-    console.log('hey');
     
     if (user.friends.includes(friendId)) {
         // If they are already friends, remove each other's IDs
@@ -152,10 +158,9 @@ export const isFriend = async (req, res) => {
 export const getFriends = async (req, res) => {
   try {
     const userId = req.user.id;
-
+    
     const user = await User.findById(userId)
   .populate('friends', 'firstname lastname email profilePhoto')
-    .select('friends')
 
     if (!user) {
       return res.status(404).json({ errors: { user: "User not found" } });

@@ -7,7 +7,7 @@ const router=express.Router();
 
 router.get('/get-users',AuthMiddleware,getUsers);
 router.get('/get-friends',AuthMiddleware,getFriends)
-router.get('/profile',AuthMiddleware,profile);
+router.get('/profile/:slug',AuthMiddleware,profile);
 router.get('/:userId',AuthMiddleware,getUser)
 router.patch('/friend/:userId',AuthMiddleware,isFriend)
 router.patch('/update/:userId',AuthMiddleware, uploadImage.single("profilePhoto"), uploadImage.single("profileBanner"),updateUser);

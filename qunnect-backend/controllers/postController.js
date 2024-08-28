@@ -9,34 +9,25 @@ import {
 
 //--------------------post section
 
-//get a single post
-export const getPost = async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const post = await Post.findById(postId).populate(
-      "author",
-      "firstname lastname"
-    );
-
-    if (!post) {
-      return res.status(404).json({ error: "post not found" });
-    }
-
-    res.json(post);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Unable to get a post" });
-  }
-};
 
 //get a post related to a particular user
 export const profilePosts = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const posts = await Post.find({ author: userId })
-      .populate("author")
-      .sort({ createdAt: -1 });
+    const { slug } = req.params;
 
+		const user = await User.findOne({ slug });
+		if (!user) return res.status(404).json({ error: "User not found" });
+
+		const posts = await Post.find({ user: user._id })
+			.sort({ createdAt: -1 })
+			.populate({
+				path: "user",
+				select: "-password",
+			})
+			.populate({
+				path: "comments.author",
+				select: "-password",
+			});
     res.json(posts);
   } catch (err) {
     console.error(err);
@@ -48,7 +39,7 @@ export const profilePosts = async (req, res) => {
 export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate("author", "firstname lastname")
+      .populate("author", "firstname lastname fullname profilePhoto slug")
       .populate({
         path: "comments",
         options: { sort: { createdAt: -1 }, limit: 3 },
@@ -175,7 +166,7 @@ export const getComment = async (req, res) => {
       _id: { $lt: lastCommentId },
     })
       .sort({ createdAt: -1 })
-      .limit(limit);
+      .limit(limit)
 
     res.json({ postId, comments });
   } catch (err) {
@@ -211,5 +202,27 @@ export const likePost = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+//get a single post
+export const getPost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const post = await Post.findById(postId).populate(
+      "author",
+      "firstname lastname fullname "
+    );
+
+    if (!post) {
+      return res.status(404).json({ error: "post not found" });
+    }
+
+    res.json(post);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Unable to get a post" });
   }
 };

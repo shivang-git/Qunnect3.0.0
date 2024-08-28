@@ -1,24 +1,25 @@
 import React from "react";
+import { Link, useParams } from "react-router-dom";
 
 const CommentCard = ({comment}) => {
-
+  const {slug}=useParams()
     
   return (
     <>
       <div className="pt-4">
         {/* Comment row */}
         <div className="flex pb-3">
-          <a className="mr-2" href="#">
+          <Link to={`/profile/${comment.author.slug}`} className="mr-2" href="#">
             <img
               className="rounded-full w-8 h-8"
               src={comment.author.profilePhoto}
             />
-          </a>
+          </Link>
           <div className="flex flex-col">
             <div className="flex items-center">
-              <a className="text-sm font-bold mr-2" href="#">
-                {comment.author.firstname}{" "}{comment.author.lastname} 
-              </a>
+            <Link to={`/profile/${comment.author.slug}`} className="text-sm font-bold mr-2" href="#">
+                {comment.author.fullname} 
+              </Link>
               <span className="text-gray-500 text-xs">{comment.moments}</span>
             </div>
             <p className="text-sm">{comment.text}</p>

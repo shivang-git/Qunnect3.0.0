@@ -24,7 +24,7 @@ export const ProfileCard = ({user}) => {
             {/* User Info with Verified Button */}
             <div className="flex items-center mt-12">
               <h2 className="text-xl font-bold text-gray-800 hover:underline">
-              <Link to='/profile'>{user.user.firstname}{" "}{user.user.lastname}</Link>
+              <Link to={`/profile/${user.user.slug}`}>{user.user.fullname}</Link>
               </h2>
               <button className=" px-2 py-1 rounded-full">
                 <svg

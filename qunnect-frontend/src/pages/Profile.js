@@ -6,14 +6,25 @@ import EditProfile from "../components/EditProfile";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getProfilepost } from "../features/posts/postSlice";
+import { getprofileUsers } from "../features/users/userSlice";
+import { useParams } from "react-router-dom";
 
 
 const Profile = () => {
+  const {slug}=useParams();
 
+  const dispatch=useDispatch();
   const [editprofile,setEditprofile]=useState(false);
-  const { user} = useSelector((state) => state.auth);
-  const {posts} = useSelector((state) => state.posts);
-
+  const user = useSelector((state) => state.users.profileUser);
+  const { posts } = useSelector((state) => state.posts);
+  console.log(user);
+  
+  const userPosts = posts.filter(post => post?.author?._id === user?._id);
+   
+  useEffect(()=>{
+    
+    dispatch(getprofileUsers(slug))
+  },[])
 
   return (
     <>
@@ -26,8 +37,8 @@ const Profile = () => {
           </div>
         
             <div className="  flex-1 h-full bg-primary px-5 flex flex-col gap-6 pt-8">
-             <div> {posts?.map((post)=>(
-                  <PostCard  key={post?._id} post={post} user={user}/>
+             <div> {userPosts?.map((post)=>(
+                  <PostCard  key={post?._id} post={post}/>
                 ))}</div>
               
             </div>

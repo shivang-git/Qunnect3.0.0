@@ -1,19 +1,20 @@
 import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
 
 const ProfileBanner = ({openEditprofile,user}) => {
-    
+    const currUser=useSelector((state)=>state.auth.user.user)
   return (
     <>
         <div
           className="w-full bg-cover bg-no-repeat bg-center"
           style={{
             height: 200,
-            backgroundImage:`url(${user.user.profileBanner})`
+            backgroundImage:`url(${user?.profileBanner})`
           }}
         >
           <img
             className="opacity-0 w-full h-full"
-            src={user.user.profileBanner}
+            src={user?.profileBanner}
             alt="dsdd"
           />
         </div>
@@ -29,7 +30,7 @@ const ProfileBanner = ({openEditprofile,user}) => {
                   <img
                     style={{ height: "9rem", width: "9rem" }}
                     className="md rounded-full relative border-4 border-gray-900"
-                    src={user.user.profilePhoto}
+                    src={user.profilePhoto}
                     alt=""
                   />
                   <div className="absolute" />
@@ -37,24 +38,24 @@ const ProfileBanner = ({openEditprofile,user}) => {
               </div>
             </div>
             {/* Follow Button */}
-            <div className="flex flex-col text-right">
+           {(currUser._id===user._id )?( <div className="flex flex-col text-right">
               <button onClick={()=>{openEditprofile(true)}} className="flex justify-center  max-h-max whitespace-nowrap focus:outline-none  focus:ring  rounded max-w-max border bg-transparent border-blue-500 text-blue-500 hover:border-blue-800 hover:border-blue-800 flex items-center hover:shadow-lg font-bold py-2 px-4 rounded-full mr-0 ml-auto">
                 Edit Profile
               </button>
-            </div>
+            </div>):"" }
           </div>
           {/* Profile info */}
           <div className="space-y-1 justify-center w-full mt-3 ml-3">
             {/* User basic*/}
             <div>
               <h2 className="text-xl leading-6 font-bold text-white">
-              {user.user.firstname}{" "}{user.user.lastname}
+              {user.fullname}
               </h2>
             </div>
             {/* Description and others */}
             <div className="mt-3">
               <p className="text-white leading-tight mb-2">
-              {user.user.bio} <br />
+              {user.bio} <br />
               </p>
               <div className="text-gray-600 flex">
                 <span className="flex mr-2">

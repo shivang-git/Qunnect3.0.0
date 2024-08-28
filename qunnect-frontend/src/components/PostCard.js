@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import {Link, useParams} from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux";
 import { commentPost, getcommentPost, likePost } from "../features/posts/postSlice";
 import * as Yup from "yup";
@@ -8,12 +9,18 @@ const CommentSchema = Yup.object({
   text: Yup.string().required("Required"),
 });
 
-const PostCard = ({ post, user }) => {
+const PostCard = ({ post }) => {
+  
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  
   const [allCmts, setAllCmts] = useState(false);
-  const [isLiked, setIsLiked] = useState(post.likes.includes(user.user._id));
+  const [isLiked, setIsLiked] = useState(post?.likes?.includes(user.user._id));
   const fileInputRef = React.useRef(null);
   const comments=post?.comments
+
+  
 
   const handleLoadMore = () => {
     const lastComment = (comments[comments.length-1])?comments[comments.length-1]:null;      
@@ -21,8 +28,8 @@ const PostCard = ({ post, user }) => {
 };
 
   useEffect(() => {
-    setIsLiked(post.likes.includes(user.user._id));
-  }, [post.likes, user.user._id,post]);
+    setIsLiked(post.likes?.includes(user.user._id));
+  }, [post?.likes, user.user._id,post]);
 
   const handleLike = () => {
     dispatch(likePost(post._id));
@@ -32,7 +39,7 @@ const PostCard = ({ post, user }) => {
     setAllCmts(!allCmts)
 
   };
-
+  
   
   const formik = useFormik({
     initialValues: {
@@ -63,19 +70,19 @@ const PostCard = ({ post, user }) => {
       <div className="bg-white w-1/2 p-4 rounded-lg shadow-sm mb-4">
         {/* User Info with Three-Dot Menu */}
         <div className="flex  items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
+          <Link to={`/profile/${post.author.slug}`} className="flex items-center space-x-2">
             <img
-              src={user.user.profilePhoto}
+              src={post.author.profilePhoto}
               alt="User Avatar"
               className="w-6 h-6 rounded-full"
             />
             <div>
-              <p className="text-gray-800 text-sm font-semibold">
-                {post.author.firstname} {post.author.lastname}
+              <p className="text-gray-800 text-sm font-semibold hover:underline">
+                {post.author.fullname}
               </p>
               <p className="text-gray-500 text-xs">{post.moments}</p>
             </div>
-          </div>
+          </Link>
           <div className="text-gray-500 cursor-pointer">
             {/* Three-dot menu icon */}
             <button className="hover:bg-gray-100 rounded-full p-1">

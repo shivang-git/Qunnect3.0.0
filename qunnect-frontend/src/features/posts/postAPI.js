@@ -25,8 +25,6 @@ const likePost=async(postId)=>{
 const commentPost=async(postId,postData)=>{
     sendAccessToken();
     const response =await axios.post(`${base_url}posts/${postId}/comment`,postData);
-    
-     
     return response.data;
 }
 
@@ -36,6 +34,7 @@ const getcommentPost=async(postId,lastCommentId )=>{
     
     return response.data;
 }
+
 
 export const postAPI={
     createPost,getPosts,likePost,commentPost,getcommentPost

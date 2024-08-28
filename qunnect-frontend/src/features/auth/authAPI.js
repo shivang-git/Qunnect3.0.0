@@ -11,19 +11,19 @@ const register=async(userData,dispatch)=>{
         const { accessToken } = response.data;
         storeAccessToken(accessToken);
         return response.data;
-    } catch (error) {
+      } catch (error) {
         const errorMessage = error.response?.data?.message || 'Registration failed';
         dispatch(registerUser.rejectedWithValue(errorMessage));
-    }
+      }
 }
 
 
 const login=async(userData,dispatch)=>{
-    try {
-        const response = await axios.post(`${base_url}auth/login`, userData);
-        const { accessToken } = response.data;
-        storeAccessToken(accessToken);
-        return response.data;
+  try {
+    const response = await axios.post(`${base_url}auth/login`, userData);
+    const { accessToken } = response.data;
+    storeAccessToken(accessToken);
+    return response.data;
 
       } catch (error) {
         const errorMessage = error.response?.data?.message || 'login failed';
