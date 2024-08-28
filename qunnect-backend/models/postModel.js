@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { timeAgo } from "../utils/time&date.js";
 
 
 // Define the Post Schema
@@ -35,6 +36,9 @@ const postSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     },
+    moments:{
+      type:String,
+    },
     updatedAt: {
       type: Date,
       default: Date.now
@@ -42,16 +46,13 @@ const postSchema = new mongoose.Schema({
   },{timestamps:true});
   
 
-//middleware to populate likes, comments,likecount
 postSchema.pre('find', async function(next) {
-  this.populate({
-    path: 'likes',
-    count:true
-  });
-  this.populate({
-    path:'comments',
-    count:true
-  });
+  this.moments = timeAgo(this.createdAt);
+  next();
+});
+
+postSchema.pre('save', async function(next) {
+  this.moments = timeAgo(this.createdAt); 
   next();
 });
 

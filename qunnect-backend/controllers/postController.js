@@ -9,7 +9,6 @@ import {
 
 //--------------------post section
 
-
 //get a single post
 export const getPost = async (req, res) => {
   try {
@@ -22,6 +21,7 @@ export const getPost = async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: "post not found" });
     }
+
     res.json(post);
   } catch (err) {
     console.error(err);
@@ -36,7 +36,7 @@ export const profilePosts = async (req, res) => {
     const posts = await Post.find({ author: userId })
       .populate("author")
       .sort({ createdAt: -1 });
-    
+
     res.json(posts);
   } catch (err) {
     console.error(err);
@@ -48,16 +48,18 @@ export const profilePosts = async (req, res) => {
 export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate("author", "firstname lastname") // populate author during fetching post
-      .sort({ createdAt: -1 }); //sort by recent post
-
+      .populate("author", "firstname lastname")
+      .populate({
+        path: "comments",
+        options: { sort: { createdAt: -1 }, limit: 3 },
+      });
+      
     res.json(posts);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Unable to get posts" });
   }
 };
-
 
 //Done with image upload to cloudinary
 export const createPost = async (req, res) => {
@@ -131,8 +133,8 @@ export const deletePost = async (req, res) => {
 //comment on a particular post done
 export const createComment = async (req, res) => {
   try {
-    const { postId } = req.params;
     const { text } = req.body;
+    const { postId } = req.params;
 
     // Find the post
     const post = await Post.findById(postId);
@@ -143,39 +145,44 @@ export const createComment = async (req, res) => {
     // Create and save comment
     const comment = await Comment.create({
       author: req.user._id,
-      text,
+      text: text,
       postedOn: postId,
     });
-    post.commentsCount++;
+    post.comments.push(comment._id);
+    post.commentsCount=post.comments.length;
     await post.save();
 
     // Return created comment details
-    res.json(comment);
+    res.status(200).json({ comment, postId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Unable to comment" });
   }
 };
 
-
 //get all comment on particular post done
-export const getComment=async(req,res)=>{
+export const getComment = async (req, res) => {
   try {
-    const postId = req.params.postId;
+    const { postId } = req.params;
+    const { lastCommentId } = req.query;
+    const limit = 3; // Adjust the limit as needed
 
-    // Find comments for the specified post
-    const comments = await Comment.find({ post: postId })
-      .populate('author') // Populate the author field
-      .sort({ createdAt: -1 });
+    if (!postId) {
+      return res.status(400).json({ error: "postId is required" });
+    }
+    const comments = await Comment.find({
+      postedOn: postId,
+      _id: { $lt: lastCommentId },
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit);
 
-    res.json(comments);
+    res.json({ postId, comments });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Error fetching comments' });
+    res.status(500).json({ error: "Error fetching comments" });
   }
-
-}
-
+};
 
 //like section
 //done like and unlike a specific post
@@ -200,10 +207,9 @@ export const likePost = async (req, res) => {
 
     await post.save();
 
-    res.json({ likes: post.likesCount });
+    res.json({ likes: post.likesCount, postId, userId });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-

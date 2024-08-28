@@ -19,14 +19,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    dob:{
+      type:Date
+    }
+    ,
     bio: {
       type: String,
     },
     profilePhoto: {
       type: String,
+      default:process.env.DEFAULT_PROFILE,
     },
     profileBanner: {
       type: String,
+      default:process.env.DEFAULT_BANNER
     },
     refreshToken: {
       type: String,
@@ -80,10 +86,6 @@ userSchema.methods.isPasswordMatched = async function (enteredPassword) {
 
 
 userSchema.pre('find', async function(next) {
-  this.populate({
-    path: 'friends',
-    count:true,
-  });
   this.populate({
     path: 'postsCreated',
     count:true,

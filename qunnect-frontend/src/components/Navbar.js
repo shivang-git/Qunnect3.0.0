@@ -1,11 +1,17 @@
 import React, { useState } from "react";
-import {Link} from 'react-router-dom';
+import { Link, NavLink } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../features/auth/authSlice";
+import { persistor } from "../app/store";
 
 const Navbar = () => {
+  const dispatch = useDispatch();
   const [isOpen, setisOpen] = useState(false);
   const [menu, setmenu] = useState(false);
- 
-
+  const handleClick = async () => {
+    await persistor.purge();
+    dispatch(logoutUser());
+  };
 
   return (
     <nav className="bg-gray-800">
@@ -15,7 +21,9 @@ const Navbar = () => {
             {/* Mobile menu button*/}
             <button
               type="button"
-              onClick ={()=>{ setisOpen(!isOpen)}}
+              onClick={() => {
+                setisOpen(!isOpen);
+              }}
               className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               aria-controls="mobile-menu"
               aria-expanded="false"
@@ -73,31 +81,46 @@ const Navbar = () => {
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
                 {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-               <Link
+                <NavLink
                   to="/"
-                  className="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
-                  aria-current="page"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
                 >
                   Home
-                </Link>
-               <Link
-                  to="messages"
-                  className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                </NavLink>
+                <NavLink
+                  to="/messages"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
                 >
                   Messages
-                </Link>
-               <Link
-                  to="#"
-                  className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                </NavLink>
+                <NavLink
+                  to="/explore"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
                 >
                   Explore
-                </Link>
-               <Link
-                  to="#"
-                  className="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                </NavLink>
+                <NavLink
+                  to="/find-friends"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
                 >
                   Find Friends
-                </Link>
+                </NavLink>
               </div>
             </div>
           </div>
@@ -126,7 +149,10 @@ const Navbar = () => {
             {/* Profile dropdown */}
             <div className="relative ml-3">
               <div>
-                <button onClick={()=>{setmenu(!menu)}}
+                <button
+                  onClick={() => {
+                    setmenu(!menu);
+                  }}
                   type="button"
                   className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                   id="user-menu-button"
@@ -153,23 +179,25 @@ const Navbar = () => {
           To: "transform opacity-0 scale-95"
       */}
               <div
-                className={`absolute ${menu?"visible":"hidden"} right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`}
+                className={`absolute ${
+                  menu ? "visible" : "hidden"
+                } right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`}
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="user-menu-button"
                 tabIndex={-1}
               >
                 {/* Active: "bg-gray-100", Not Active: "" */}
-                <Link
-                  to="profile"
+                <NavLink
+                  to="/profile"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
                   role="menuitem"
                   tabIndex={-1}
                   id="user-menu-item-0"
                 >
                   Your Profile
-                </Link>
-               <Link
+                </NavLink>
+                <NavLink
                   to="#"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
                   role="menuitem"
@@ -177,50 +205,69 @@ const Navbar = () => {
                   id="user-menu-item-1"
                 >
                   Settings
-                </Link>
-               <Link
-                  to="login"
+                </NavLink>
+                <NavLink
+                  to="/login"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
                   role="menuitem"
                   tabIndex={-1}
                   id="user-menu-item-2"
+                  onClick={handleClick}
                 >
                   Sign out
-                </Link>
+                </NavLink>
               </div>
             </div>
           </div>
         </div>
       </div>
       {/* Mobile menu, show/hide based on menu state. */}
-      <div className={`sm:hidden ${isOpen?"visible":"hidden"}`} id="mobile-menu">
+      <div
+        className={`sm:hidden ${isOpen ? "visible" : "hidden"}`}
+        id="mobile-menu"
+      >
         <div className="space-y-1 px-2 pb-3 pt-2">
           {/* Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" */}
-         <Link
-            to="/"
-            className="bg-gray-900 text-white block rounded-md px-3 py-2 text-base font-medium"
-            aria-current="page"
-          >
-            Home
-          </Link>
-         <Link
-            to="messages"
-            className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-          >
-            Messages
-          </Link>
-         <Link
-            to="#"
-            className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-          >
-            Explore
-          </Link>
-         <Link
-            to="#"
-            className="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-          >
-            Find Friend
-          </Link>
+          <NavLink
+                  to="/"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
+                >
+                  Home
+                </NavLink>
+                <NavLink
+                  to="/messages"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
+                >
+                  Messages
+                </NavLink>
+                <NavLink
+                  to="/explore"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
+                >
+                  Explore
+                </NavLink>
+                <NavLink
+                  to="/find-friends"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                  }
+                >
+                  Find Friends
+                </NavLink>
         </div>
       </div>
     </nav>

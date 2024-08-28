@@ -3,10 +3,26 @@ import { cloudinaryDeleteImg, cloudinaryUploadImg } from "../utils/cloudinaryCon
 
 export const getUsers = async (req, res) => {
   try {
-    // Retrieve all users from the database
-    const users = await User.find();
-
-    res.json(users); // Return the list of users
+   
+    
+    const currentUserId = req.user._id;
+  
+    const users = await User.aggregate([
+      {
+        $match: {
+          _id: { $ne: currentUserId }
+        }
+      },{
+        $project: {
+          firstname: 1,
+          lastname:1,
+          email: 1,
+          profilePhoto: 1
+        }
+      }
+    ])
+   
+    res.json(users);
   } catch (error) {
     console.error(error);
     res.status(500).json({ errors: ["Failed to fetch users"] });
@@ -101,5 +117,53 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ errors: ["Failed to delete user"] });
+  }
+};
+
+
+ 
+export const isFriend = async (req, res) => {
+  const userId=req.user.id
+  const friendId = req.params.userId;
+  try {
+    const user = await User.findById(userId);
+    const friend = await User.findById(friendId);
+    console.log('hey');
+    
+    if (user.friends.includes(friendId)) {
+        // If they are already friends, remove each other's IDs
+        user.friends = user.friends.filter(id => id.toString() !== friendId.toString());
+        friend.friends = friend.friends.filter(id => id.toString() !== userId.toString());
+    } else {
+        // If they are not friends, add each other's IDs
+        user.friends.push(friendId);
+        friend.friends.push(userId);
+    }
+
+    await user.save();
+    await friend.save();
+
+    res.status(200).json({friendId:friend._id});
+} catch (error) {
+    res.status(500).json({ error: 'Error updating friend status' });
+}
+}
+
+export const getFriends = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId)
+  .populate('friends', 'firstname lastname email profilePhoto')
+    .select('friends')
+
+    if (!user) {
+      return res.status(404).json({ errors: { user: "User not found" } });
+    }
+
+    res.json(user.friends); 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ errors: ["Failed to fetch user"] });
   }
 };

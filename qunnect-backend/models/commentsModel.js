@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+import { timeAgo } from "../utils/time&date.js";
+
 // Define the Comment Schema
 const commentSchema = new mongoose.Schema(
   {
@@ -7,17 +9,21 @@ const commentSchema = new mongoose.Schema(
       type:  mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    postedOn: {
-      type:  mongoose.Schema.Types.ObjectId,
-      ref: "Post",
-    },
     text: {
       type: String,
       required: true,
     },
+    postedOn: {
+      type:  mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+    },
+   
     createdAt: {
       type: Date,
       default: Date.now,
+    },
+    moments:{
+      type:String,
     },
   },
   { timestamps: true }
@@ -33,6 +39,12 @@ commentSchema.pre('find', async function(next) {
   this.populate({
     path:'postedOn'
   });
+  this.moments = timeAgo(this.createdAt);
+  next();
+});
+
+commentSchema.pre('save', async function(next) {
+  this.moments = timeAgo(this.createdAt); 
   next();
 });
 

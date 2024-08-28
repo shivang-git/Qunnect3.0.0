@@ -1,8 +1,45 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import Dateofbirth from "../components/Dateofbirth";
+import { Link, useNavigate } from "react-router-dom";
+import * as Yup from "yup";
+import { useFormik } from "formik";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../features/auth/authSlice";
+import { useHomeRedirect } from "../customHooks/useHomeRedirect";
+
+const SignupSchema = Yup.object({
+  firstname: Yup.string()
+    .min(2, "Too Short!")
+    .max(50, "Too Long!")
+    .required("Required"),
+  lastname: Yup.string()
+    .min(2, "Too Short!")
+    .max(50, "Too Long!")
+    .required("Required"),
+  email: Yup.string().email("Invalid email").required("Required"),
+  password: Yup.string()
+    .min(4, "Too Short!")
+    .max(10, "Too Long!")
+    .required("Required"),
+  dob: Yup.string().required("Required"),
+});
 
 const Signup = () => {
+  const navigate=useNavigate()
+  const dispatch = useDispatch();
+  const formik = useFormik({
+    initialValues: {
+      firstname: "",
+      lastname: "",
+      email: "",
+      password: "",
+      dob: "",
+    },
+    validationSchema: SignupSchema,
+    onSubmit: (values) => {
+      dispatch(registerUser(values)).then(() => navigate("/login"));
+    },
+  });
+
   return (
     <>
       <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -22,46 +59,54 @@ const Signup = () => {
         </div>
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form className="space-y-6" action="#" method="POST">
+            <form className="space-y-6" onSubmit={formik.handleSubmit}>
               <div className="flex gap-1">
-              <div>
-                <label
-                  htmlFor="first-name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                 First Name
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="first-name"
-                    name="first-name"
-                    type="text"
-                    autoComplete="text"
-                    required=""
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                    placeholder="Enter your first name"
-                  />
+                <div>
+                  <label
+                    htmlFor="firstname"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    First Name
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      id="firstname"
+                      name="firstname"
+                      type="text"
+                      className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      placeholder="Enter your first name"
+                      value={formik.values.firstname}
+                      onChange={formik.handleChange("firstname")}
+                      onBlur={formik.handleBlur("firstname")}
+                    />
+                    <div className="error">
+                      {formik.touched.firstname && formik.errors.firstname}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="last-name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Last Name
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="last-name"
-                    name="last-name"
-                    type="text"
-                    autoComplete="text"
-                    required=""
-                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                    placeholder="Enter your last name"
-                  />
+                <div>
+                  <label
+                    htmlFor="lastname"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Last Name
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      id="lastname"
+                      name="lastname"
+                      type="text"
+                      className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      placeholder="Enter your last name"
+                      value={formik.values.lastname}
+                      onChange={formik.handleChange("lastname")}
+                      onBlur={formik.handleBlur("lastname")}
+                    />
+                    <div className="error">
+                      {formik.touched.lastname && formik.errors.lastname}
+                    </div>
+                  </div>
                 </div>
-              </div>
               </div>
               <div>
                 <label
@@ -75,11 +120,15 @@ const Signup = () => {
                     id="email"
                     name="email"
                     type="email"
-                    autoComplete="email"
-                    required=""
                     className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                     placeholder="Enter your email address"
+                    value={formik.values.email}
+                    onChange={formik.handleChange("email")}
+                    onBlur={formik.handleBlur("email")}
                   />
+                  <div className="error">
+                    {formik.touched.email && formik.errors.email}
+                  </div>
                 </div>
               </div>
               <div>
@@ -94,11 +143,15 @@ const Signup = () => {
                     id="password"
                     name="password"
                     type="password"
-                    autoComplete="current-password"
-                    required=""
                     className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                     placeholder="Enter your password"
+                    value={formik.values.password}
+                    onChange={formik.handleChange("password")}
+                    onBlur={formik.handleBlur("password")}
                   />
+                  <div className="error">
+                    {formik.touched.password && formik.errors.password}
+                  </div>
                 </div>
               </div>
               <div>
@@ -113,13 +166,18 @@ const Signup = () => {
                     id="dob"
                     name="dob"
                     type="date"
-                    required=""
                     className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                     placeholder="Enter your password"
+                    value={formik.values.dob}
+                    onChange={formik.handleChange("dob")}
+                    onBlur={formik.handleBlur("dob")}
                   />
+                  <div className="error">
+                    {formik.touched.dob && formik.errors.dob}
+                  </div>
                 </div>
               </div>
-              
+
               <div>
                 <button
                   type="submit"

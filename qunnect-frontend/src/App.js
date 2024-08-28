@@ -1,10 +1,8 @@
+import React from 'react';
 import {
   BrowserRouter,
-  Navigate,
-  Outlet,
   Route,
   Routes,
-  useLocation,
 } from "react-router-dom";
 import "./App.css";
 import Signup from "./pages/Signup";
@@ -15,16 +13,24 @@ import ResetPassword from "./pages/ResetPassword";
 import ForgetPassword from "./pages/ForgetPassword";
 import Layout from "./components/Layout";
 import Message from "./pages/Message";
+import { useSelector } from "react-redux";
+import sendAccessToken from './utils/sendAccessToken';
+import PrivateRoute from "./utils/PrivateRoute";
+import FindFriends from "./pages/FindFriends";
+import Conversation from './components/Converstation';
 
 function App() {
+
   return (
     <>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="messages" element={<Message />} />
+            <Route index element={<PrivateRoute element={Home} />} />
+            <Route path="profile" element={<PrivateRoute element={Profile} />} />
+            <Route path="messages" element={<PrivateRoute element={Message} />} >
+            </Route>  
+            <Route path="find-friends" element={<PrivateRoute element={FindFriends} />}/>
           </Route>
       
             <Route path="signup" element={<Signup />} />

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export const ProfileCard = () => {
+export const ProfileCard = ({user}) => {
   return (
     <>
       <>
@@ -11,12 +11,12 @@ export const ProfileCard = () => {
             {/* Banner Profile */}
             <div className="relative">
               <img
-                src="https://placekitten.com/500/150"
+                src={user.user.profileBanner}
                 alt="Banner Profile"
                 className="w-full rounded-t-lg"
               />
               <img
-                src="https://placekitten.com/150/150"
+                src={user.user.profilePhoto}
                 alt="Profile Picture"
                 className="absolute bottom-0 left-2/4 transform -translate-x-1/2 translate-y-1/2 w-24 h-24 rounded-full border-4 border-white"
               />
@@ -24,7 +24,7 @@ export const ProfileCard = () => {
             {/* User Info with Verified Button */}
             <div className="flex items-center mt-12">
               <h2 className="text-xl font-bold text-gray-800 hover:underline">
-              <Link to='/profile'>Shivang Srivastava</Link>
+              <Link to='/profile'>{user.user.firstname}{" "}{user.user.lastname}</Link>
               </h2>
               <button className=" px-2 py-1 rounded-full">
                 <svg
@@ -57,8 +57,7 @@ export const ProfileCard = () => {
             </div>
             {/* Bio */}
             <p className="text-gray-700 mt-2">
-              {" "}
-              Web Developer | Cat Lover | Coffee Enthusiast{" "}
+             {user.bio}
             </p>
             {/* Social Links */}
             <div className="flex items-center mt-4 space-x-4">

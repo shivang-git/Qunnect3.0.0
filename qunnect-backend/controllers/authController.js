@@ -9,7 +9,7 @@ import {
 //access and refresh token required
 export const registerUser = async (req, res) => {
   try {
-    const { email, firstname, lastname, password } = req.body;
+    const { email, firstname, lastname, password,dob } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -20,6 +20,7 @@ export const registerUser = async (req, res) => {
       lastname,
       email,
       password,
+      dob
     });
 
     const savedUser = await User.findById(newUser._id).select("-password");
@@ -34,7 +35,7 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    const isCorrect = user.isPasswordMatched(password);
+    const isCorrect = user?.isPasswordMatched(password);
 
     if (!user || !isCorrect) {
       return res.status(400).json({ message: "Invalid credential" });

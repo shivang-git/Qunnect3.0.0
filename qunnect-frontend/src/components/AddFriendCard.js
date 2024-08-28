@@ -4,11 +4,11 @@ const AddFriendCard = () => {
   return (
     <>
     <div className="bg-white p-4 rounded-lg shadow-md pb-4 mb-6">
-      <card className=" w-96 rounded-lg shadow-lg">
+      <div className=" w-96 rounded-lg shadow-lg">
         <header className="font-bold text-2xl px-4 py-2">Who to follow</header>
         <hr className="mt-2 mb-2" />
         <main className="px-5 py-3">
-          <content className="grid grid-cols-6">
+          <section className="grid grid-cols-6">
             <div className="">
               <img
                 src="https://picsum.photos/200/200"
@@ -27,8 +27,8 @@ const AddFriendCard = () => {
                 .Follow
               </button>
             </div>
-          </content>
-          <content className="grid grid-cols-6 mt-6">
+          </section>
+          <section className="grid grid-cols-6 mt-6">
             <div className="">
               <img
                 src="https://picsum.photos/200/200?i=200"
@@ -44,8 +44,8 @@ const AddFriendCard = () => {
                 .Follow
               </button>
             </div>
-          </content>
-          <content className="grid grid-cols-6 mt-6">
+          </section>
+          <section className="grid grid-cols-6 mt-6">
             <div className="">
               <img
                 src="https://picsum.photos/200/200?i=200"
@@ -61,8 +61,8 @@ const AddFriendCard = () => {
                 .Follow
               </button>
             </div>
-          </content>
-          <content className="grid grid-cols-6 mt-6">
+          </section>
+          <section className="grid grid-cols-6 mt-6">
             <div className="">
               <img
                 src="https://picsum.photos/200/200?i=200"
@@ -78,9 +78,9 @@ const AddFriendCard = () => {
                 .Follow
               </button>
             </div>
-          </content>
+          </section>
         </main>
-      </card>
+      </div>
       </div>
     </>
   );

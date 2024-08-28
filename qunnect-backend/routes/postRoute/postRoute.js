@@ -21,11 +21,11 @@ router.get("/get-post/:postId",AuthMiddleware, getPost);
 router.get("/get-posts",AuthMiddleware, getPosts);
 
 
-router.post('/:postId/comment',AuthMiddleware,createComment);
+router.post('/:postId/comment',AuthMiddleware,uploadImage.none(),createComment);
 router.post("/create-post",AuthMiddleware,uploadImage.single('postImage'), createPost);
 
 
-router.put("/:postId/like",AuthMiddleware, likePost);
+router.patch("/:postId/like",AuthMiddleware, likePost);
 router.put("/update-post/:postId",AuthMiddleware, updatePost);
 
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const ProfileBanner = ({openEditprofile}) => {
+const ProfileBanner = ({openEditprofile,user}) => {
     
   return (
     <>
@@ -8,14 +8,13 @@ const ProfileBanner = ({openEditprofile}) => {
           className="w-full bg-cover bg-no-repeat bg-center"
           style={{
             height: 200,
-            backgroundImage:
-              "url(https://pbs.twimg.com/profile_banners/2161323234/1585151401/600x200)",
+            backgroundImage:`url(${user.user.profileBanner})`
           }}
         >
           <img
             className="opacity-0 w-full h-full"
-            src="https://pbs.twimg.com/profile_banners/2161323234/1585151401/600x200"
-            alt=""
+            src={user.user.profileBanner}
+            alt="dsdd"
           />
         </div>
         <div className="p-4 bg-gray-800 ">
@@ -30,7 +29,7 @@ const ProfileBanner = ({openEditprofile}) => {
                   <img
                     style={{ height: "9rem", width: "9rem" }}
                     className="md rounded-full relative border-4 border-gray-900"
-                    src="https://pbs.twimg.com/profile_images/1254779846615420930/7I4kP65u_400x400.jpg"
+                    src={user.user.profilePhoto}
                     alt=""
                   />
                   <div className="absolute" />
@@ -49,13 +48,13 @@ const ProfileBanner = ({openEditprofile}) => {
             {/* User basic*/}
             <div>
               <h2 className="text-xl leading-6 font-bold text-white">
-                Shivang Srivastava
+              {user.user.firstname}{" "}{user.user.lastname}
               </h2>
             </div>
             {/* Description and others */}
             <div className="mt-3">
               <p className="text-white leading-tight mb-2">
-                Software Engineer / Designer / Entrepreneur <br />
+              {user.user.bio} <br />
               </p>
               <div className="text-gray-600 flex">
                 <span className="flex mr-2">
