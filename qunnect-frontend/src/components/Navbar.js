@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../features/auth/authSlice";
 import { persistor } from "../app/store";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const [isOpen, setisOpen] = useState(false);
+  const user=useSelector((state)=>state.auth.user.user)
   const [menu, setmenu] = useState(false);
   const handleClick = async () => {
     await persistor.purge();
@@ -189,7 +190,7 @@ const Navbar = () => {
               >
                 {/* Active: "bg-gray-100", Not Active: "" */}
                 <NavLink
-                  to="/profile"
+                  to={`/profile/${user.slug}`}
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
                   role="menuitem"
                   tabIndex={-1}

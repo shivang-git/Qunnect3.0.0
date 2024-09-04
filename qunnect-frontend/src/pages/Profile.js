@@ -17,7 +17,6 @@ const Profile = () => {
   const [editprofile,setEditprofile]=useState(false);
   const user = useSelector((state) => state.users.profileUser);
   const { posts } = useSelector((state) => state.posts);
-  console.log(user);
   
   const userPosts = posts.filter(post => post?.author?._id === user?._id);
    

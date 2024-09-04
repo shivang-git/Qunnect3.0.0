@@ -157,6 +157,7 @@ export const isFriend = async (req, res) => {
 
 export const getFriends = async (req, res) => {
   try {
+
     const userId = req.user.id;
     
     const user = await User.findById(userId)
@@ -172,3 +173,21 @@ export const getFriends = async (req, res) => {
     res.status(500).json({ errors: ["Failed to fetch user"] });
   }
 };
+
+
+export const searchContact= async (req, res) => {
+  const { query } = req.query; 
+  const currentUser = await User.findById(req.user.id);
+  try {
+
+    const Contacts = await User.find({
+      _id: { $in: currentUser.friends }, // Filter by friends
+      fullname: { $regex: query, $options: 'i' },
+    }).limit(10).select('fullname');
+
+
+      res.status(200).json(Contacts);
+  } catch (err) {
+      res.status(500).json({ error: err.message });
+  }
+}

@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { loginUser } from "../features/auth/authSlice";
 
 const LoginSchema = Yup.object({
+  
   email: Yup.string().email("Invalid email").required("Required"),
   password: Yup.string()
     .min(4, "Too Short!")
@@ -13,17 +14,9 @@ const LoginSchema = Yup.object({
     .required("Required"),
 });
 
-
-
-
 const Login = () => {
-  const navigate = useNavigate();
+  const navigate=useNavigate();
   const dispatch = useDispatch();
-  
-  const guestLogin={
-    email: "guestlogin@qunnect.com",
-    password: "12345",
-  }
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -31,19 +24,14 @@ const Login = () => {
     },
     validationSchema: LoginSchema,
     onSubmit: (values) => {
-      dispatch(loginUser(values)).then(() => navigate("/"));
+      dispatch(loginUser(values)).then(()=>navigate('/'));
     },
   });
 
 
-  const handleGuestLogin = () => {
-    formik.setValues(guestLogin, false); // Set values without triggering validation
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md ">
-      
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Log in to your account
         </h2>
@@ -56,17 +44,9 @@ const Login = () => {
             create an account
           </Link>
         </p>
-        <div className="mt-6">
-            <button onClick={handleGuestLogin}
-              className="w-full flex items-center justify-center px-8 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <h1>Guest Login</h1>
-            </button>
-          </div>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        
           <form className="space-y-6" onSubmit={formik.handleSubmit}>
             <div>
               <label
@@ -149,8 +129,6 @@ const Login = () => {
               </button>
             </div>
           </form>
-
-       
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

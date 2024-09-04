@@ -1,18 +1,32 @@
 import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
-  sender: {
+  conversationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Conversation',
+        required: true
+  },
+  senderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
-  recipient: {
+  recipientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  // messageType:{
+  //   type:String,
+  //   enum:['text','file'],
+  // },
   content: {
     type: String,
-    required: true,
   },
+  // fileUrl:{
+  //   type:String,
+  //   required:function(){
+  //     return this.messageType==="file"
+  //   }
+  // },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -23,4 +37,5 @@ const messageSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Message', messageSchema);
+const Message= mongoose.model('Message', messageSchema);
+export default Message;

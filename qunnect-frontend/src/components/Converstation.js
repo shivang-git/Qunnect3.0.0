@@ -4,8 +4,47 @@ import { Link, NavLink } from "react-router-dom";
 const Conversation = ({friend}) => {
   
 
+    const [selectedConversation,setSelectedConversation]=useState(null);
+
+    const handleConversation=(friend)=>{
+      setSelectedConversation(friend);
+      console.log(selectedConversation);
+      
+    }
+//   useEffect(() => {
+//     // Join the conversation room
+//     socket.emit('joinRoom', { conversationId });
+
+//     // Fetch all messages for this conversation
+//     dispatch(fetchMessages(conversationId));
+
+//     // Listen for new messages
+//     socket.on('receiveMessage', (message) => {
+//         dispatch(addMessage(message));
+//     });
+
+//     // Cleanup
+//     return () => {
+//         socket.off('receiveMessage');
+//     };
+// }, [conversationId, dispatch]);
+
+// const handleSendMessage = () => {
+//     const messageData = {
+//         conversationId,
+//         senderId,
+//         text
+//     };
+
+//     socket.emit('sendMessage', messageData);
+//     setText('');
+// };
+
   return (
-    <NavLink to="#" className={`flex flex-row items-center py-4 px-4 relative hover:bg-gray-200 `}>
+    <div  className={`flex flex-row items-center py-4 px-4 relative ${selectedConversation && selectedConversation.id === friend.id
+                  ? "bg-blue-100"
+                  : "hover:bg-gray-200"}`} onClick={() => handleConversation(friend)}
+>
             <div className="absolute text-xs text-gray-500 right-0 top-0 mr-6 mt-3">
               2 hours ago
             </div>
@@ -29,8 +68,9 @@ const Conversation = ({friend}) => {
               </span>
             </div>
           
-</NavLink>
+</div>
   )
 }
 
 export default Conversation
+

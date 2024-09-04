@@ -78,13 +78,12 @@ const userSchema = new mongoose.Schema(
         ref: "Comment",
       },
     ],
-    conversations: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Conversation',
-    }],
+  
   },
   { timestamps: true }
 );
+
+
 
 userSchema.pre('save', async function (next) {
   const salt = bcrypt.genSaltSync(10);
@@ -104,12 +103,6 @@ userSchema.pre('save', async function (next) {
   }
 
   this.fullname = `${this.firstname} ${this.lastname}`;
-
-
-
-
-
-
 
   next();
 });

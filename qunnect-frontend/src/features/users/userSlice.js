@@ -15,7 +15,9 @@ const initialState={
 export const userSlice=createSlice({
     name:"users",
     initialState,
-    reducers:{},
+    reducers:{
+        
+    },
     extraReducers:(builder)=>{
         builder
         .addCase(getUsers.pending,(state)=>{

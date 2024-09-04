@@ -6,12 +6,13 @@ import storage from 'redux-persist/lib/storage';
 import userReducer from '../features/users/userSlice.js'
 import postReducer from '../features/posts/postSlice.js'
 import authReducer from '../features/auth/authSlice.js'
-
+import messageReducer from '../features/messages/messageSlice.js'
 
 const rootReducer=combineReducers({
   users:userReducer,
   posts:postReducer,
-  auth:authReducer
+  auth:authReducer,
+  messages:messageReducer
 })
 
 const persistConfig = {

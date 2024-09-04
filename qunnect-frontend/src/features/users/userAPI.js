@@ -21,9 +21,6 @@ const getUsers=async()=>{
 const getprofileUsers=async(slug)=>{
   try {
       sendAccessToken();
-
-      
-      
       const response =await axios.get(`${base_url}user/profile/${slug}`);  
         
       return response.data;

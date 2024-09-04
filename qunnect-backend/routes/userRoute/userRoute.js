@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUsers, updateUser, getUser, profile, deleteUser, isFriend, getFriends } from '../../controllers/userController.js';
+import { getUsers, updateUser, getUser, profile, deleteUser, isFriend, getFriends, searchContact } from '../../controllers/userController.js';
 import { uploadImage } from "../../middlewares/uploadImages.js";
 import { AuthMiddleware } from '../../middlewares/authMiddleware.js';
 
@@ -7,6 +7,7 @@ const router=express.Router();
 
 router.get('/get-users',AuthMiddleware,getUsers);
 router.get('/get-friends',AuthMiddleware,getFriends)
+router.get('/search-contact',AuthMiddleware,searchContact);
 router.get('/profile/:slug',AuthMiddleware,profile);
 router.get('/:userId',AuthMiddleware,getUser)
 router.patch('/friend/:userId',AuthMiddleware,isFriend)
