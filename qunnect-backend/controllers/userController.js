@@ -1,3 +1,4 @@
+import Conversation from "../models/conversationModel.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import { cloudinaryDeleteImg, cloudinaryUploadImg } from "../utils/cloudinaryConfig.js";
@@ -175,19 +176,31 @@ export const getFriends = async (req, res) => {
 };
 
 
-export const searchContact= async (req, res) => {
-  const { query } = req.query; 
+export const searchContact = async (req, res) => {
+  const { query } = req.query;
   const currentUser = await User.findById(req.user.id);
+
   try {
+    // Fetch conversations involving the current user
+    const conversations = await Conversation.find({
+      participants: currentUser._id,
+    }).select('participants');
 
+    // Extract participants from conversations
+    const participantsInConversations = conversations.flatMap((conv) =>
+      conv.participants.map((participant) => participant.toString())
+    );
+
+    // Search friends who are not in conversation
     const Contacts = await User.find({
-      _id: { $in: currentUser.friends }, // Filter by friends
+      _id: { $in: currentUser.friends, $nin: participantsInConversations }, // Filter friends and exclude participants in conversations
       fullname: { $regex: query, $options: 'i' },
-    }).limit(10).select('fullname');
+    })
+      .limit(10)
+      .select('fullname');
 
-
-      res.status(200).json(Contacts);
+    res.status(200).json(Contacts);
   } catch (err) {
-      res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
-}
+};

@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import cors from "cors";
 import connectDB from '../config/dbConnect.js';
 connectDB();
-// import {socketServer} from './socketServer.js';
+import {socketServer} from './socketServer.js';
 
 
 
@@ -19,7 +19,7 @@ import MessageRouter from '../routes/messageRoute/messageRoute.js';
 const app=express();
 const Server=createServer(app);
 const port=process.env.PORT || 8000
-// socketServer(Server);
+socketServer(Server);
 
 app.use(cors({
         origin:process.env.ORIGIN,
