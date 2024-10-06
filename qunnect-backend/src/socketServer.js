@@ -1,6 +1,5 @@
 import { Server } from "socket.io";
 import Message from "../models/messageModel.js";
-import User from "../";
 
 export const socketServer = (httpServer) => {
   const io = new Server(httpServer, {
@@ -9,6 +8,7 @@ export const socketServer = (httpServer) => {
       methods: ["GET", "POST"],
     },
   });
+
 
   io.on("connection", (socket) => {
     console.log("A user connected");

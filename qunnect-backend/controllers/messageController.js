@@ -69,8 +69,9 @@ export const getConversations = async (req, res) => {
 
 //not done
 export const getConversationMessages = async (req, res) => {
-    const { conversationId } = req.params;
-
+    const { conversationId } = req.params;  
+    console.log(conversationId);
+      
     try {
         const messages = await Message.find({ conversationId }).sort({ createdAt: 1 });
         res.status(200).json({messages,conversationId});

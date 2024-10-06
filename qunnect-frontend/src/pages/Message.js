@@ -11,7 +11,7 @@ import { clearSearchResults, createConversation, getConversations, getMessages, 
 import { useDispatch, useSelector } from "react-redux";
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3000/messages');
+const socket = io('http://localhost:5000');
 
 const Message = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -21,17 +21,24 @@ const Message = () => {
   
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-
+  
   
   const Contacts = useSelector((state) => state.messages.Contacts);
   const Conversations = useSelector((state) => state.messages.Conversations);
   const Messages = useSelector((state) => {
-    if (selectedConversation && selectedConversation._id) {
-      const conversation = state.messages.Conversations.find((conversation) => conversation._id === selectedConversation._id);
-      return conversation ? conversation.messages : [];
+    // Check if `selectedConversation` and `selectedConversation._id` exist
+    if (!selectedConversation || !selectedConversation._id) {
+      return []; // Return an empty array if no valid selected conversation
     }
-    return [];
+  
+    // Safely access `Chats` in the state, ensuring both `messages` and `Chats` exist
+    const conversationMessages =
+      state.messages?.Chats?.[selectedConversation._id] || []; // Safe optional chaining
+  
+    return conversationMessages; // Return the messages or an empty array if undefined
   });
+
+  console.log(Messages); 
 
   useEffect(() => {
     // Listen for incoming messages
@@ -223,13 +230,20 @@ const Message = () => {
 
             {/* Messages Display */}
             <ScrollArea className="flex-grow p-4">
-              {Messages?.map((message, index) => (
-                <div key={index} className={`my-2 ${message.senderId === "currentUserId" ? "text-right" : "text-left"}`}>
-                  <div className={`inline-block rounded-lg px-3 py-2 ${message.senderId === "currentUserId" ? "bg-blue-500 text-white" : "bg-gray-200"}`}>
-                    {message.content}
-                  </div>
-                </div>
-              ))}
+            {Messages?.map((message, index) => (
+    <div
+      key={index}
+      className={`flex my-2 ${message.senderId === user.user._id ? "justify-end" : "justify-start"}`}
+    >
+      <div
+        className={`inline-block rounded-lg px-3 py-2 max-w-xs break-words ${
+          message.senderId === user.user._id ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
+        }`}
+      >
+        {message.content}
+      </div>
+    </div>
+  ))}
             </ScrollArea>
 
             {/* Message Input */}

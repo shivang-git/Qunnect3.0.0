@@ -4,7 +4,7 @@ import { messageAPI } from "./messageAPI";
 const initialState = {
   Contacts: [],
   Conversations: [],
-  Messages: {}, // Store messages per conversation
+  Chats: {}, // Store messages per conversation
   isError: false,
   isLoggedIn: false,
   isRegistered: false,
@@ -18,13 +18,13 @@ export const getMessages = createAsyncThunk(
   async (conversationId, { rejectWithValue }) => {
     try {
       const response = await messageAPI.getConversationMessages(conversationId);
-      return { conversationId, messages: response }; // Return conversationId with messages
+      // Ensure the response contains both the conversationId and messages
+      return response; 
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
-
 // Other thunks (searchContact, getConversations, createConversation)
 export const searchContact = createAsyncThunk(
   "user/search-contact",
@@ -73,23 +73,23 @@ export const messageSlice = createSlice({
       const { conversationId, messages } = action.payload;
 
       // Ensure the Messages object for this conversation exists
-      if (!state.Messages[conversationId]) {
-        state.Messages[conversationId] = []; // Initialize if undefined
+      if (!state.Chats[conversationId]) {
+        state.Chats[conversationId] = []; // Initialize if undefined
       }
 
       // Add new messages to existing ones
-      state.Messages[conversationId].push(...messages); 
+      state.Chats[conversationId].push(...messages); 
     },
     addMessage: (state, action) => {
       const { conversationId, message } = action.payload;
 
       // Ensure the Messages object for this conversation exists
-      if (!state.Messages[conversationId]) {
-        state.Messages[conversationId] = []; // Initialize if undefined
+      if (!state.Chats[conversationId]) {
+        state.Chats[conversationId] = []; // Initialize if undefined
       }
 
       // Add new message to conversation
-      state.Messages[conversationId].push(message); 
+      state.Chats[conversationId].push(message); 
     },
   },
   extraReducers: (builder) => {
@@ -152,14 +152,20 @@ export const messageSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         const { conversationId, messages } = action.payload;
-
-        // Ensure the Messages object for this conversation exists
-        if (!state.Messages[conversationId]) {
-          state.Messages[conversationId] = []; // Initialize if undefined
+        console.log(messages);
+        
+        // Ensure the Chats object exists before accessing conversationId
+        if (!state.Chats) {
+          state.Chats = {}; // Initialize Chats if it's undefined
         }
-
-        // Store messages by conversationId
-        state.Messages[conversationId] = messages; 
+    
+        // Ensure the Messages array for this conversation exists
+        if (!state.Chats[conversationId]) {
+          state.Chats[conversationId] = []; // Initialize if undefined
+        }
+    
+        // Add or replace the messages for the conversation
+        state.Chats[conversationId] = messages;
       })
       .addCase(getMessages.rejected, (state) => {
         state.isLoading = false;

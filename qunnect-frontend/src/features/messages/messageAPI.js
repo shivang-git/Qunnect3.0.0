@@ -44,12 +44,10 @@ const getConversations = async () => {
 
 //not done
 // Fetch all messages for a specific conversation
-const getConversationMessages = async (conversationId) => {
+const getConversationMessages = async (convoid) => {  
   try {
     sendAccessToken();
-    const response = await axios.get(`${base_url}chats/${conversationId}`);
-    console.log(response.data);
-    
+    const response = await axios.get(`${base_url}chats/${convoid}`);
     return response.data;
   } catch (error) {
     const errorMessage = error.response?.data?.message || "An error occurred while fetching messages";
