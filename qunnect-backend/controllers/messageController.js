@@ -67,7 +67,7 @@ export const getConversations = async (req, res) => {
   
 
 
-//not done
+// done
 export const getConversationMessages = async (req, res) => {
     const { conversationId } = req.params;  
     console.log(conversationId);

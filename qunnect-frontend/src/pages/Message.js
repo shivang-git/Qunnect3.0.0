@@ -1,106 +1,85 @@
-import { useState, useCallback, useEffect } from "react";
+'use client'
+
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { debounce } from "lodash";
+import { io } from 'socket.io-client';
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
-import { MessageCircle, Send, Search, Menu, Phone, Video, UserPlus, MoreVertical } from "lucide-react";
-import { debounce } from "lodash";
+import { Send, Search, Menu, Phone, Video, UserPlus, MoreVertical,Plus } from "lucide-react";
 import { clearSearchResults, createConversation, getConversations, getMessages, searchContact, addMessage } from "../features/messages/messageSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
 
-const Message = () => {
+const socket = io(process.env.REACT_APP_HOST);
+
+export default function Message() {
   const [selectedConversation, setSelectedConversation] = useState(null);
-  
   const [inputMessage, setInputMessage] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  
+  const chatEndRef = useRef(null);
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  
-  
   const Contacts = useSelector((state) => state.messages.Contacts);
   const Conversations = useSelector((state) => state.messages.Conversations);
   const Messages = useSelector((state) => {
-    // Check if `selectedConversation` and `selectedConversation._id` exist
-    if (!selectedConversation || !selectedConversation._id) {
-      return []; // Return an empty array if no valid selected conversation
-    }
-  
-    // Safely access `Chats` in the state, ensuring both `messages` and `Chats` exist
-    const conversationMessages =
-      state.messages?.Chats?.[selectedConversation._id] || []; // Safe optional chaining
-  
-    return conversationMessages; // Return the messages or an empty array if undefined
+    if (!selectedConversation || !selectedConversation._id) return [];
+    return state.messages?.Chats?.[selectedConversation._id] || [];
   });
-
-  console.log(Messages); 
-
-  useEffect(() => {
-    // Listen for incoming messages
-    socket.on('receiveMessage', (message) => {
-      dispatch(addMessage({ conversationId: selectedConversation._id, message }));
-    });
-
-    // Clean up the socket connection on unmount
-    return () => {
-      socket.off('receiveMessage');
-    };
-  }, [dispatch, selectedConversation]);
-
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (inputMessage.trim() === "") return;
-    const recipient=selectedConversation.participants[0];
-    
-    const newMessage = {
-      conversationId: selectedConversation._id,
-      senderId:user.user._id,
-      recipientId:recipient._id,
-      content: inputMessage,
-      timestamp: new Date().toISOString(), // Add timestamp if needed
-    };
-
-    // Emit the sendMessage event to the server
-    socket.emit('sendMessage', newMessage);
-
-    // Clear input field after sending message
-    setInputMessage("");
-  };
-
-
 
   useEffect(() => {
     dispatch(getConversations());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (selectedConversation) {
+      socket.emit('joinRoom', { conversationId: selectedConversation._id });
+      const handleReceiveMessage = (message) => {
+        if (message.conversationId === selectedConversation._id) {
+          dispatch(addMessage({ conversationId: selectedConversation._id, message }));
+        }
+      };
+      socket.on('receiveMessage', handleReceiveMessage);
+      return () => socket.off('receiveMessage', handleReceiveMessage);
+    }
+  }, [dispatch, selectedConversation]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [Messages]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (inputMessage.trim() === "") return;
+    const newMessage = {
+      conversationId: selectedConversation._id,
+      senderId: user.user._id,
+      recipientId: selectedConversation.participants[0]._id,
+      content: inputMessage,
+      timestamp: new Date().toISOString(),
+    };
+    // Only emit the message through the socket
+    socket.emit('sendMessage', newMessage);
+    setInputMessage("");
+  };
+
   const handleConversationClick = (conversation) => {
     setSelectedConversation(conversation);
     dispatch(getMessages(conversation._id));
-
   };
 
+  const debouncedHandleInput = useCallback(debounce((value) => {
+    if (value.trim() === "") {
+      dispatch(clearSearchResults());
+      return;
+    }
+    dispatch(searchContact(value));
+  }, 600), [dispatch]);
 
-
-  const debouncedHandleInput = useCallback(
-    debounce((value) => {
-      if (value.trim() === "") {
-        dispatch(clearSearchResults());
-        return;
-      }
-      dispatch(searchContact(value));
-    }, 600),
-    [dispatch]
-  );
-
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    debouncedHandleInput(value);
-  };
+  const handleSearch = (e) => debouncedHandleInput(e.target.value);
 
   const handleAddUser = (user) => {
     dispatch(createConversation({ userId: user._id }));
@@ -108,166 +87,145 @@ const Message = () => {
     dispatch(clearSearchResults());
   };
 
-  const ConversationList = () => (
-    <div className="w-full h-full bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold">Conversations</h2>
-      </div>
-      <ScrollArea className="flex-grow">
-        {Conversations.map((conversation) => {
-          const participant = conversation.participants[0]; // Assuming one-to-one chat
-          return (
-            <div
-              key={conversation._id}
-              className={`p-4 cursor-pointer hover:bg-gray-100 ${selectedConversation?._id === conversation._id ? "bg-gray-100" : ""}`}
-              onClick={() => handleConversationClick(conversation)}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Avatar>
-                    <AvatarImage src={participant.profilePhoto || `https://api.dicebear.com/6.x/initials/svg?seed=${participant.fullname}`} />
-                    <AvatarFallback>{participant.fullname.split(" ").map((n) => n[0]).join("")}</AvatarFallback>
-                  </Avatar>
-                  <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${participant.isOnline ? "bg-green-500" : "bg-gray-300"}`}></span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-baseline">
-                    <p className="font-medium truncate">{participant.fullname}</p>
-                    <span className="text-xs text-gray-400">{conversation.timestamp || "Just now"}</span>
-                  </div>
-                  <p className="text-sm text-gray-500 truncate">{conversation.isTyping ? "Typing..." : conversation.lastMessage || "No messages yet"}</p>
-                </div>
+  const ConversationList = useMemo(() => (
+    <ScrollArea className="h-[calc(100vh-140px)]">
+      {Conversations.map((conversation) => {
+        const participant = conversation.participants[0];
+        return (
+          <div
+            key={conversation._id}
+            className={`p-3 cursor-pointer hover:bg-gray-100 ${selectedConversation?._id === conversation._id ? "bg-gray-100" : ""}`}
+            onClick={() => handleConversationClick(conversation)}
+          >
+            <div className="flex items-center space-x-3">
+              <Avatar>
+                <AvatarImage
+                  src={participant.profilePhoto || `https://api.dicebear.com/6.x/initials/svg?seed=${participant.fullname}`}
+                />
+                <AvatarFallback>{participant.fullname.split(" ").map((n) => n[0]).join("")}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{participant.fullname}</p>
+                <p className="text-sm text-gray-500 truncate">{conversation.lastMessage || "No messages yet"}</p>
               </div>
             </div>
-          );
-        })}
-      </ScrollArea>
-      <div className="p-4 border-t border-gray-200">
-        <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full">
-              <Search className="h-5 w-5 mr-2" />
-              Search Users
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
-            <div className="space-y-4">
-              <Input type="text" placeholder="Search users..." onInput={handleSearch} />
-              <ScrollArea className="h-[200px]">
-                {Contacts.map((contact) => (
-                  <div key={contact._id} className="flex items-center justify-between space-x-3 p-2 hover:bg-gray-100 rounded-md">
-                    <div className="flex items-center space-x-3">
-                      <Avatar>
-                        <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${contact.fullname}`} />
-                        <AvatarFallback>{contact.fullname}</AvatarFallback>
-                      </Avatar>
-                      <span>{contact.fullname}</span>
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={() => handleAddUser(contact)}>
-                      <UserPlus className="h-5 w-5" />
-                    </Button>
-                  </div>
-                ))}
-              </ScrollArea>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-    </div>
-  );
+          </div>
+        );
+      })}
+    </ScrollArea>
+  ), [Conversations, selectedConversation, handleConversationClick]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Conversation List Sidebar - Hidden on mobile, visible on tablet and larger */}
-      <div className="hidden md:block md:w-1/3 lg:w-1/4">
-        <ConversationList />
+    <div className="flex h-[calc(100vh-66px)] bg-gray-100 p-4">
+      <div className="hidden md:block md:w-80 bg-white border-r rounded-l-lg overflow-hidden">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Messages</h2>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-2">
+                <Plus className="h-5 w-5" />
+                <span className="sr-only">New Message</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="start" side="right">
+              <div className="p-4 space-y-4">
+                <h3 className="font-medium leading-none">New Message</h3>
+                <Input type="text" placeholder="Search users..." onChange={handleSearch} />
+                <ScrollArea className="h-[300px] overflow-y-auto">
+                  {Contacts.map((contact) => (
+                    <div
+                      key={contact._id}
+                      className="flex items-center justify-between p-2 hover:bg-gray-100"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Avatar>
+                          <AvatarImage
+                            src={`https://api.dicebear.com/6.x/initials/svg?seed=${contact.fullname}`}
+                          />
+                          <AvatarFallback>{contact.fullname}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm">{contact.fullname}</span>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => handleAddUser(contact)}>
+                        <UserPlus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        {ConversationList}
       </div>
-      <div className="flex flex-col w-full md:w-2/3 lg:w-3/4">
-        <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between md:hidden">
+      <div className="flex flex-col flex-1 bg-white rounded-r-lg overflow-hidden">
+        <div className="p-4 border-b bg-white md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="sm">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-4/5">
-              <ConversationList />
+            <SheetContent side="left" className="p-0 w-80">
+              {ConversationList}
             </SheetContent>
           </Sheet>
         </div>
-
-        {/* Chat Window */}
         {selectedConversation ? (
           <>
-            {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 bg-white">
-              <div className="flex items-center justify-between">
-                {/* Optional Chat Header Content */}
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Avatar>
-                      <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${selectedConversation.name}`} />
-                      <AvatarFallback>{selectedConversation.name}</AvatarFallback>
-                    </Avatar>
-                    <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ${selectedConversation.isOnline ? "bg-green-500" : "bg-gray-300"}`}></span>
-                  </div>
-                  <p className="text-lg font-semibold">{selectedConversation.name}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="icon">
-                    <Phone className="h-5 w-5" />
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    <Video className="h-5 w-5" />
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </div>
+            <div className="p-4 border-b bg-white flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Avatar>
+                  <AvatarImage src={selectedConversation.participants[0].profilePhoto} />
+                  <AvatarFallback>{selectedConversation.participants[0].fullname}</AvatarFallback>
+                </Avatar>
+                <span className="font-medium">{selectedConversation.participants[0].fullname}</span>
+              </div>
+              <div className="flex space-x-2">
+                <Button variant="ghost" size="icon"><Phone className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon"><Video className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
               </div>
             </div>
-
-            {/* Messages Display */}
-            <ScrollArea className="flex-grow p-4">
-            {Messages?.map((message, index) => (
-    <div
-      key={index}
-      className={`flex my-2 ${message.senderId === user.user._id ? "justify-end" : "justify-start"}`}
-    >
-      <div
-        className={`inline-block rounded-lg px-3 py-2 max-w-xs break-words ${
-          message.senderId === user.user._id ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
-        }`}
-      >
-        {message.content}
-      </div>
-    </div>
-  ))}
+            <ScrollArea className="flex-1 p-4">
+              {Messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex my-2 ${message.senderId === user.user._id ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`inline-block rounded-lg px-3 py-2 max-w-xs break-words ${
+                      message.senderId === user.user._id ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              ))}
+              <div ref={chatEndRef} />
             </ScrollArea>
-
-            {/* Message Input */}
-            <div className="p-4 border-t border-gray-200 bg-white">
-              <form onSubmit={handleSendMessage} className="flex items-center">
+            <form onSubmit={handleSendMessage} className="p-4 border-t bg-white">
+              <div className="flex items-center space-x-2">
                 <Input
                   type="text"
                   placeholder="Type a message..."
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  className="flex-grow"
+                  className="flex-1"
                 />
-                <Button type="submit" className="ml-2">
-                  <Send className="h-5 w-5" />
+                <Button type="submit" size="icon">
+                  <Send className="h-4 w-4" />
                 </Button>
-              </form>
-            </div>
+              </div>
+            </form>
           </>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">Select a conversation to start chatting.</div>
+          <div className="flex items-center justify-center h-full text-gray-500">
+            Select a conversation to start chatting.
+          </div>
         )}
       </div>
     </div>
   );
-};
+}
 
-export default Message;

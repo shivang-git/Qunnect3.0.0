@@ -1,62 +1,71 @@
+'use client'
+
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getPosts } from "../features/posts/postSlice";
 import { ProfileCard } from "../components/ProfileCard";
 import PostCard from "../components/PostCard";
 import CreatePost from "../components/CreatePost";
 import AddFriendCard from "../components/AddFriendCard";
-import { useDispatch, useSelector } from "react-redux";
-import { getPosts } from "../features/posts/postSlice";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Skeleton } from "../components/ui/skeleton";
+import { Bell, MessageCircle, Search, Users } from "lucide-react";
 
 const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
- 
   const { user } = useSelector((state) => state.auth);
-  
   const { posts } = useSelector((state) => state.posts);
-  
   const dispatch = useDispatch();
 
   useEffect(() => {
-      setIsLoading(isLoading);
-      dispatch(getPosts())
-        .unwrap()
-        .then(() => setIsLoading(false));
-  }, [ dispatch,isLoading]);
+    setIsLoading(true);
+    dispatch(getPosts())
+      .unwrap()
+      .then(() => setIsLoading(false));
+  }, [dispatch]);
 
   return (
-    <>
-   
-        <div className="home w-full  px-0 bg-gray-100 lg:px-10  2xl:px-40 bg-bgColor lg:rounded-lg h-screen overflow-hidden">
-          <div className="w-full flex gap-2 lg:gap-4 pt-5 pb-10 h-full">
-            {/* left component */}
-            <div className="hidden w-1/4 lg:w-1/4 h-full md:flex flex-col gap-6 overflow-y-auto">
-              <ProfileCard user={user} />
-              <AddFriendCard />
-            </div>
-            {/* center component */}
-            <div className="flex-1 h-full bg-primary px-5 flex flex-col gap-6 overflow-y-auto">
-              <div className="pt-0">
-                <CreatePost />
-              </div>
-
-              {isLoading ? (
-                <div>Loading...</div>
-              ) : (
-                <div>
-                  {" "}
-                  {posts?.map((post) => (
-                    <PostCard key={post?._id} post={post} />
-                  ))}
-                </div>
-              )}
-            </div>
+    (<div className="bg-background min-h-screen">
+  
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Left sidebar */}
+          <div className="hidden lg:block w-1/4">
+            <ProfileCard user={user} />
           </div>
 
-          {/* Right component */}
-          {/* <div className="hidden w-1/3 lg:w-1/4 h-full md:flex flex-col gap-6 overflow-y-auto">
-            
-          </div> */}
+          {/* Main content */}
+          <div className="flex-1 space-y-6">
+            <CreatePost />
+            {isLoading ? (
+              <Card>
+                <CardContent className="p-4">
+                  <Skeleton className="h-4 w-2/3 mb-4" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardContent>
+              </Card>
+            ) : (
+              posts?.map((post) => <PostCard key={post?._id} post={post} />)
+            )}
+          </div>
+
+          {/* Right sidebar */}
+          <div className="hidden xl:block w-1/4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Add to your feed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* <AddFriendCard /> */}
+              </CardContent>
+            </Card>
+          </div>
         </div>
-    </>
+      </main>
+    </div>)
   );
 };
 

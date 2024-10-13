@@ -152,7 +152,7 @@ export const messageSlice = createSlice({
         state.isError = false;
         state.isSuccess = true;
         const { conversationId, messages } = action.payload;
-        console.log(messages);
+
         
         // Ensure the Chats object exists before accessing conversationId
         if (!state.Chats) {
