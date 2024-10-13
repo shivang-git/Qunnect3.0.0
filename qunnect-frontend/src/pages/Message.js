@@ -14,9 +14,7 @@ import { Send, Search, Menu, Phone, Video, UserPlus, MoreVertical,Plus } from "l
 import { clearSearchResults, createConversation, getConversations, getMessages, searchContact, addMessage } from "../features/messages/messageSlice";
 
 
-const socket = io(process.env.REACT_APP_HOST, {
-  transports: ['websocket']  // Force WebSocket transport
-});
+const socket = io(process.env.REACT_APP_HOST);
 
 
 export default function Message() {

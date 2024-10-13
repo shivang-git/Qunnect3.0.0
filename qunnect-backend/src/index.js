@@ -46,6 +46,9 @@ app.use('/api/user',UserRouter)
 app.use('/api/posts',PostRouter)
 app.use('/api/chats',MessageRouter)
 
+app.get('/test', (req, res) => {
+    res.send('Backend is running on Vercel!');
+  });
 Server.listen(port,()=>{
     console.log(`server listening in port ${port}`);
 })
