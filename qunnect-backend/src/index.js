@@ -23,7 +23,7 @@ socketServer(Server);
 
 app.use(cors({
         origin:process.env.ORIGIN,
-        methods:["GET","POST","PUT","PATCH","DELETE"],
+        methods:["GET","POST","PUT","PATCH","DELETE",'OPTIONS'],
         credentials:true,
     })
 )
