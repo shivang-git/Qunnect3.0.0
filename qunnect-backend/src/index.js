@@ -27,6 +27,14 @@ app.use(cors({
         credentials:true,
     })
 )
+
+
+app.options('*', cors({
+    origin: process.env.ORIGIN,  // Handle the preflight requests
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+}));
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}));
 
